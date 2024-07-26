@@ -28,11 +28,8 @@ app.post('/update-order', async (req, res) => {
 app.post('/update-order-meta', async (req, res) => {
     try {
         const { orderId, formFieldValue } = req.body;
-        console.log(orderId);
         let requestBody = await JSON.stringify(operations['updateOrderMetaObject'](orderId,formFieldValue));
-        console.log(requestBody);
         const record = await callAPI(requestBody, SHOPIFY_APP_API_TOKEN);
-        console.log(record);
         res.status(record.status).json(record);
     } catch (error) {
         console.error('Error processing data:', error.message);
@@ -42,12 +39,20 @@ app.post('/update-order-meta', async (req, res) => {
 });
 
 app.post('/send-email', async (req, res) => {
-    const { to, subject, name, message, footer  } = req.body;
+    console.log(req.body);
+    const { orderID, orderData } = req.body;
+    const subject = "Resend Invoice";
+    const footer = "Footer Text";
+    const email = orderData.email;
+    const firstName = orderData.firstName;
+    const lastName = orderData.lastName;
+    const QRImage = orderData.QRImage;
+
     try {
-        let info = await sendEmail(to, subject, { name, message, footer });
-        res.status(200).json({ message: 'Email sent', info: info });
+        let info = await sendEmail(email, subject, { firstName, lastName, QRImage, footer });
+        res.status(200).json({ message: 'Email sent', data: info });
     } catch (error) {
-        res.status(500).json({ message: 'Error sending email', error: error });
+        res.status(500).json({ message: 'Error sending email', data: error });
     }
 });
 
